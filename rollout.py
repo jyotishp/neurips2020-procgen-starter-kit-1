@@ -27,6 +27,7 @@ from ray.tune.utils import merge_dicts
 from ray.tune.registry import get_trainable_cls
 
 from utils.loader import load_envs, load_models, load_algorithms, load_preprocessors
+from aicrowd_helpers.config import EASY_GAME_RANGES
 
 """
 Note : This script has been adapted from :
@@ -288,6 +289,26 @@ def run(args, parser):
         if not config.get("env"):
             parser.error("the following arguments are required: --env")
         args.env = config.get("env")
+
+    ### Add game rewards
+    env_name = config["env_config"].get("env_name", "coinrun")
+    return_min = EASY_GAME_RANGES.get(env_name)[0]
+    return_blind = EASY_GAME_RANGES.get(env_name)[1]
+    return_max = EASY_GAME_RANGES.get(env_name)[2]
+    config["env_config"]["return_min"] = return_min
+    config["env_config"]["return_blind"] = return_blind
+    config["env_config"]["return_max"] = return_max
+
+    ### Add rollout flag
+    config["env_config"]["rollout"] = True
+    if "custom_model_config" in config["model"]:
+        # For newer `rllib` versions
+        config["model"]["custom_model_config"]["rollout"] = True
+    else:
+        # For older `rllib` versions
+        if "custom_options" not in config["model"]:
+            config["model"]["custom_options"] = {}
+        config["model"]["custom_options"]["rollout"] = True
 
     ray.init()
 

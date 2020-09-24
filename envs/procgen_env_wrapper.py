@@ -25,6 +25,7 @@ class ProcgenEnvWrapper(gym.Env):
         }
         self.config = self._default_config
         self.config.update(config)
+        self.config.pop("rollout", False)
 
         self.env_name = self.config.pop("env_name")
         assert self.env_name in VALID_ENV_NAMES

@@ -218,6 +218,18 @@ def run(args, parser):
         exp["config"]["env_config"]["return_blind"] = return_blind
         exp["config"]["env_config"]["return_max"] = return_max
 
+        ### Add rollout flag
+        exp["config"]["env_config"]["rollout"] = False
+
+        if "custom_model_config" in exp["config"]["model"]:
+            # For newer `rllib` versions
+            exp["config"]["model"]["custom_model_config"]["rollout"] = False
+        else:
+            # For older `rllib` versions
+            if "custom_options" not in exp["config"]["model"]:
+                exp["config"]["model"]["custom_options"] = {}
+            exp["config"]["model"]["custom_options"]["rollout"] = False
+
     if args.ray_num_nodes:
         cluster = Cluster()
         for _ in range(args.ray_num_nodes):
